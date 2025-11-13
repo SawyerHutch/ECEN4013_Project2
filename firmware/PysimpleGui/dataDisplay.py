@@ -7,9 +7,9 @@ import time
 import queue
 
 # ---- USBReader ----
-# reader = USBReader(port='COM5') # uncomment when having gps and imu connected
+reader = USBReader(port='COM4') # uncomment when having gps and imu connected
 
-# ---- DummyReader to simulate USBReader ---- (Erease dummyt usb reader when having real usb connected)
+'''# ---- DummyReader to simulate USBReader ---- (Erease dummyt usb reader when having real usb connected)
 class DummyReader:
     def __init__(self):
         self.data_queue = queue.Queue()
@@ -43,7 +43,7 @@ def feed_dummy_data():
         time.sleep(0.5)
 
 # Start the dummy data thread
-threading.Thread(target=feed_dummy_data, daemon=True).start()
+threading.Thread(target=feed_dummy_data, daemon=True).start()'''
 
 # ---- Matplotlib Figure ----
 fig, ax = plt.subplots()
@@ -119,31 +119,28 @@ while True:
         line.set_data(lat_data, lon_data)
         fig_agg.draw()
 
-    # ---- Update data from USBReader ----
-    if not reader.data_queue.empty():
-        data = reader.data_queue.get()
+# ---- Update data from USBReader ----
+while not reader.data_queue.empty():
+    data = reader.data_queue.get()
+    # Update GPS
+    if "LAT" in data: 
+        window['lat'].update(f"Latitude: {data['LAT']:.6f}")
+        lat_data.append(data['LAT'])
+    if "LON" in data: 
+        window['lon'].update(f"Longitude: {data['LON']:.6f}")
+        lon_data.append(data['LON'])
+    if "ALT" in data:
+        window['alt'].update(f"Altitude: {data['ALT']:.1f} m")
+    if "SATS" in data:
+        window['sats'].update(f"Satellites: {int(data['SATS'])}")
 
-        if "LAT" in data: 
-            window['lat'].update(f"Latitude: {data['LAT']:.6f}")
-            lat_data.append(data['LAT'])
-        if "LON" in data: 
-            window['lon'].update(f"Longitude: {data['LON']:.6f}")
-            lon_data.append(data['LON'])
-        if "ALT" in data: window['alt'].update(f"Altitude: {data['ALT']:.1f} m")
-        if "AX" in data: window['ax'].update(f"Ax: {data['AX']:.2f} m/s²")
-        if "AY" in data: window['ay'].update(f"Ay: {data['AY']:.2f} m/s²")
-        if "AZ" in data: window['az'].update(f"Az: {data['AZ']:.2f} m/s²")
+    # Update IMU
+    if "AX" in data: window['ax'].update(f"Ax: {data['AX']:.2f} m/s²")
+    if "AY" in data: window['ay'].update(f"Ay: {data['AY']:.2f} m/s²")
+    if "AZ" in data: window['az'].update(f"Az: {data['AZ']:.2f} m/s²")
 
-        # ---- Update satellites counter ----
-        satellites += 1
-        window['sats'].update(f"Satellites: {satellites}")
-
-        # ---- Update plot ----
-        line.set_data(lon_data, lat_data)
-        ax.relim()
-        ax.autoscale_view()
-        fig_agg.draw()
-
-# ---- Cleanup ----
-reader.stop()
-window.close()
+    # Update plot
+    line.set_data(lon_data, lat_data)
+    ax.relim()
+    ax.autoscale_view()
+    fig_agg.draw()
