@@ -3,7 +3,7 @@ import threading
 import queue
 
 class USBReader:
-    def __init__(self, port='COM4', baud=115200):
+    def __init__(self, port='COM5', baud=115200):
         try:
             self.ser = serial.Serial(port, baud, timeout=1)
             print(f"Opened serial port {port} at {baud} baud.")
