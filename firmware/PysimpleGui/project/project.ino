@@ -1,42 +1,39 @@
 #include <TinyGPSPlus.h>
 
 TinyGPSPlus gps;
-HardwareSerial &gpsSerial = Serial1;
+unsigned long lastUpdate = 0;
+const int LED_PIN = 13;  // Teensy onboard LED
 
 void setup() {
-  Serial.begin(115200);
-  while (!Serial) ;
+  Serial.begin(115200);     // USB serial (to PC)
+  Serial1.begin(9600);      // GPS UART
+  
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
 
-  // RESET GPS
-  pinMode(9, OUTPUT);
-  digitalWrite(9, LOW);
-  delay(100);
-  digitalWrite(9, HIGH);
-
-  gpsSerial.begin(9600);
-  Serial.println("Teensy GPS ready - COLD START");
+  Serial.println("Teensy GPS starting...");
 }
 
 void loop() {
-  while (gpsSerial.available()) {
-    char c = gpsSerial.read();
-    Serial.write(c);
-    gps.encode(c);
+  while (Serial1.available() > 0) {
+    gps.encode(Serial1.read());
   }
 
-  static uint32_t last = 0;
-  if (millis() - last >= 1000) {
-    Serial.print("SATS_IN_VIEW: ");
-    Serial.println(gps.satellites.value());
-    last = millis();
-  }
+  if (millis() - lastUpdate >= 1000) {  // update every second
+    lastUpdate = millis();
 
-  if (gps.location.isUpdated()) {
-    Serial.print("LAT,");  Serial.print(gps.location.lat(), 6);
-    Serial.print(",LON,"); Serial.print(gps.location.lng(), 6);
-    Serial.print(",ALT,"); Serial.print(gps.altitude.meters(), 1);
-    Serial.print(",SATS,"); Serial.println(gps.satellites.value());
-  }
+    bool fix = gps.location.isValid() && gps.satellites.value() > 0;
+    digitalWrite(LED_PIN, fix ? HIGH : LOW);
 
-  delay(10);
+    // Output in machine-readable format
+    if (fix) {
+      Serial.print("LAT,");  Serial.print(gps.location.lat(), 6);
+      Serial.print(",LON,"); Serial.print(gps.location.lng(), 6);
+      Serial.print(",ALT,"); Serial.print(gps.altitude.meters(), 1);
+      Serial.print(",SATS,"); Serial.print(gps.satellites.value());
+      Serial.print(",HDOP,"); Serial.println(gps.hdop.value());
+    } else {
+      Serial.println("LAT,0,LON,0,ALT,0,SATS,0,HDOP,0");
+    }
+  }
 }
