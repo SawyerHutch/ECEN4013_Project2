@@ -38,9 +38,18 @@ dataDisplay = [
     [sg.Text("Altitude: -- m", key='alt')],
     [sg.Text("Satellites: 0", key='sats')],
     [sg.Text("IMU Data", justification="center", font=('Arial Bold', 20))],
-    [sg.Text("Ax: -- °", key='ax')],
-    [sg.Text("Ay: -- °", key='ay')],
-    [sg.Text("Az: -- °", key='az')],
+    [sg.Text("Gyroscope (rad/s)", font=('Arial Bold', 14))],
+    [sg.Text("GX: --", key='gx')],
+    [sg.Text("GY: --", key='gy')],
+    [sg.Text("GZ: --", key='gz')],
+    [sg.Text("Accelerometer (m/s²)", font=('Arial Bold', 14))],
+    [sg.Text("AX: --", key='ax')],
+    [sg.Text("AY: --", key='ay')],
+    [sg.Text("AZ: --", key='az')],
+    [sg.Text("Magnetic Field (µT)", font=('Arial Bold', 14))],
+    [sg.Text("MX: --", key='mx')],
+    [sg.Text("MY: --", key='my')],
+    [sg.Text("MZ: --", key='mz')],
     [sg.Canvas(size=(400, 300), key='-CANVAS-')]
 ]
 
@@ -96,11 +105,21 @@ while True:
             window['alt'].update(f"Altitude: {data['ALT']:.1f} m")
         if "SATS" in data:
             window['sats'].update(f"Satellites: {int(data['SATS'])}")
+    # ----- IMU Data -----
+        # Update Gyroscope
+        if "GX" in data: window['gx'].update(f"GX: {data['GX']:.3f}")
+        if "GY" in data: window['gy'].update(f"GY: {data['GY']:.3f}")
+        if "GZ" in data: window['gz'].update(f"GZ: {data['GZ']:.3f}")
 
-        # Update IMU (Euler angles)
-        if "AX" in data: window['ax'].update(f"Ax: {data['AX']:.2f}°")
-        if "AY" in data: window['ay'].update(f"Ay: {data['AY']:.2f}°")
-        if "AZ" in data: window['az'].update(f"Az: {data['AZ']:.2f}°")
+        # Update Accelerometer
+        if "AX" in data: window['ax'].update(f"AX: {data['AX']:.3f}")
+        if "AY" in data: window['ay'].update(f"AY: {data['AY']:.3f}")
+        if "AZ" in data: window['az'].update(f"AZ: {data['AZ']:.3f}")
+
+        # Update Magnetometer
+        if "MX" in data: window['mx'].update(f"MX: {data['MX']:.3f}")
+        if "MY" in data: window['my'].update(f"MY: {data['MY']:.3f}")
+        if "MZ" in data: window['mz'].update(f"MZ: {data['MZ']:.3f}")
 
         # Update plot
         line.set_data(lon_data, lat_data)

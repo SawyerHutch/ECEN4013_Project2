@@ -33,3 +33,5 @@ class USBReader:
         self.running = False
         self.thread.join()
         self.ser.close()
+
+
