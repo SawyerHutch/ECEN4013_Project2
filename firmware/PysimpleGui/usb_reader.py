@@ -1,3 +1,5 @@
+# Updated parse code for new project.ino code
+
 import serial
 import threading
 import queue
@@ -25,22 +27,33 @@ class USBReader:
                     parsed = self.parse_line(line)
                     if parsed:
                         self.data_queue.put(parsed)
-                    else:
-                        print("Failed to parse line:", line)
             except Exception as e:
                 print("Serial error:", e)
 
     def parse_line(self, line):
         """
-        Parse CSV key,value,key,value,... lines into a dictionary.
-        Returns None if parsing fails.
+        Parse CSV key,value,key,value,... lines.
+        Keep ONLY numeric values (GUI expects floats).
+        Ignore anything else.
         """
         try:
             items = line.split(',')
-            if len(items) % 2 != 0:
+            if len(items) < 2:
                 return None
-            data = {items[i]: float(items[i+1]) for i in range(0, len(items), 2)}
-            return data
+
+            data = {}
+            for i in range(0, len(items)-1, 2):
+                key = items[i].strip()
+                val = items[i+1].strip()
+
+                # Attempt numeric conversion
+                try:
+                    data[key] = float(val)
+                except:
+                    continue  # skip non-numeric values like TIME, DATE
+
+            return data if data else None
+
         except Exception as e:
             print("Parse exception:", e)
             return None
