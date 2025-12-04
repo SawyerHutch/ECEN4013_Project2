@@ -105,8 +105,8 @@ void timeUpdate(SensorData &d){
   if (hour > 24){
     hour -= 24;
   }
-    d.dateStr = String(gps.date.month()) + "/" + String(gps.date.day()) + "/" + String(gps.date.year());
-    d.timeStr =  String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
+    d.dateStr = String(gps.date.month()) + "/" + String(day) + "/" + String(gps.date.year());
+    d.timeStr =  String(hour) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
 }
 
 void transmitGUI(SensorData &sensorPacket) {
