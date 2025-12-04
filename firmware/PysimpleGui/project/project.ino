@@ -95,6 +95,16 @@ void imuUpdate(SensorData &d){
 }
 
 void timeUpdate(SensorData &d){
+  int offset = -6; //conversion to Our Time zone
+  int hour = gps.time.hour() + offset;
+  int day = gps.date.day();
+  if (hour < 0){
+    hour += 24;
+    day -= 1;
+  }
+  if (hour > 24){
+    hour -= 24;
+  }
     d.dateStr = String(gps.date.month()) + "/" + String(gps.date.day()) + "/" + String(gps.date.year());
     d.timeStr =  String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second());
 }
@@ -288,8 +298,8 @@ void loop() {
     digitalWrite(LED_PIN, HIGH);   // or LOW
   }
 
-  // ----- MAIN UPDATE LOOP (2 Sec) -----
-  if (millis() - lastUpdate >= 2000) {
+  // ----- MAIN UPDATE LOOP (.5 Sec) -----
+  if (millis() - lastUpdate >= 500) {
     lastUpdate = millis();
    
 
